@@ -79,6 +79,32 @@ tasks:
     cmds:
       - "{{.COMPOSE}} exec lilith bash -c 'echo \"Python: $(python --version)\" && echo \"Node:   $(node --version)\" && echo \"npm:    $(npm --version)\" && echo \"Claude: $(claude --version 2>/dev/null || echo not-logged-in)\" && echo \"tmux:   $(tmux -V)\" && echo \"ttyd:   $(ttyd --version)\" && echo \"git:    $(git --version)\"'"
 
+  # ── CI ──────────────────────────────────────────────────────────
+
+  scan:
+    desc: Build and run Trivy vulnerability scan (mirrors PR pipeline)
+    cmds:
+      - docker build -t {{.PROJECT}}:scan .
+      - docker run --rm
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v trivy-cache:/root/.cache/
+          aquasec/trivy:latest image
+          --exit-code 1
+          --severity CRITICAL,HIGH
+          --ignore-unfixed
+          {{.PROJECT}}:scan
+
+  scan:full:
+    desc: Full Trivy scan (all severities)
+    cmds:
+      - docker build -t {{.PROJECT}}:scan .
+      - docker run --rm
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v trivy-cache:/root/.cache/
+          aquasec/trivy:latest image
+          --severity CRITICAL,HIGH,MEDIUM,LOW
+          {{.PROJECT}}:scan
+
   # ── Setup ────────────────────────────────────────────────────────
 
   init:

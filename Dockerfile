@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Dev tools
     build-essential cmake pkg-config \
     # Git + SSH
-    git openssh-client openssh-server \
+    git openssh-client \
     # Terminal
     tmux screen htop less vim nano jq ripgrep fd-find \
     # Python
