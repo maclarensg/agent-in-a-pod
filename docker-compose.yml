@@ -1,0 +1,38 @@
+services:
+  lilith:
+    build:
+      context: .
+      args:
+        USERNAME: lilith
+        USER_UID: 1000
+        USER_GID: 1000
+    ports:
+      - "127.0.0.1:7681:7681"
+    volumes:
+      # Workspace — mount your project(s) here
+      - ${WORKSPACE:-/home/gavinyap/Workspace}:/home/lilith/workspace
+
+      # Persist Claude login + settings across restarts
+      - claude-data:/home/lilith/.claude
+
+      # SSH keys (read-only from host)
+      - ${HOME}/.ssh:/home/lilith/.ssh:ro
+
+      # Git config (read-only from host)
+      - ${HOME}/.gitconfig:/home/lilith/.gitconfig:ro
+
+      # Persist bash history
+      - shell-history:/home/lilith/.bash_history_dir
+    environment:
+      - GIT_USER_NAME=${GIT_USER_NAME:-}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - TERM=xterm-256color
+    restart: unless-stopped
+    hostname: agent-in-a-pod
+    stdin_open: true
+    tty: true
+
+volumes:
+  claude-data:
+  shell-history:

@@ -1,0 +1,92 @@
+version: "3"
+
+vars:
+  PROJECT: agent-in-a-pod
+  COMPOSE: docker compose
+
+tasks:
+  # ── Build ────────────────────────────────────────────────────────
+
+  build:
+    desc: Build the container image
+    cmds:
+      - "{{.COMPOSE}} build"
+
+  build:no-cache:
+    desc: Build from scratch (no cache)
+    cmds:
+      - "{{.COMPOSE}} build --no-cache"
+
+  # ── Lifecycle ────────────────────────────────────────────────────
+
+  up:
+    desc: Start the pod (detached)
+    cmds:
+      - "{{.COMPOSE}} up -d"
+
+  down:
+    desc: Stop and remove containers
+    cmds:
+      - "{{.COMPOSE}} down"
+
+  restart:
+    desc: Restart the pod (preserves tmux session)
+    cmds:
+      - "{{.COMPOSE}} restart"
+
+  destroy:
+    desc: Tear down everything including volumes
+    prompt: This will delete all persistent data (claude login, shell history). Continue?
+    cmds:
+      - "{{.COMPOSE}} down -v"
+
+  # ── Access ───────────────────────────────────────────────────────
+
+  shell:
+    desc: Attach to the container shell directly
+    cmds:
+      - "{{.COMPOSE}} exec lilith bash"
+
+  attach:
+    desc: Attach to the running tmux session
+    cmds:
+      - "{{.COMPOSE}} exec lilith tmux attach -t lilith"
+
+  claude:
+    desc: Launch Claude Code inside the container
+    cmds:
+      - "{{.COMPOSE}} exec lilith claude"
+
+  login:
+    desc: Run claude login (first-time setup)
+    cmds:
+      - "{{.COMPOSE}} exec lilith claude login"
+
+  # ── Status ───────────────────────────────────────────────────────
+
+  status:
+    desc: Show container status
+    cmds:
+      - "{{.COMPOSE}} ps"
+
+  logs:
+    desc: Tail container logs
+    cmds:
+      - "{{.COMPOSE}} logs -f --tail=50"
+
+  info:
+    desc: Show versions of installed tools
+    cmds:
+      - "{{.COMPOSE}} exec lilith bash -c 'echo \"Python: $(python --version)\" && echo \"Node:   $(node --version)\" && echo \"npm:    $(npm --version)\" && echo \"Claude: $(claude --version 2>/dev/null || echo not-logged-in)\" && echo \"tmux:   $(tmux -V)\" && echo \"ttyd:   $(ttyd --version)\" && echo \"git:    $(git --version)\"'"
+
+  # ── Setup ────────────────────────────────────────────────────────
+
+  init:
+    desc: First-time setup — copy env, build, start, login
+    cmds:
+      - cp -n .env.example .env || true
+      - task: build
+      - task: up
+      - echo ""
+      - echo "Pod is up. Open your browser to the ttyd endpoint."
+      - echo "Run 'task login' to authenticate Claude with your Max subscription."
