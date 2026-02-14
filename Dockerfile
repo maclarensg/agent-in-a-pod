@@ -48,8 +48,8 @@ RUN curl -fsSL https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}
 RUN npm install -g @anthropic-ai/claude-code
 
 # ── User setup ───────────────────────────────────────────────────
-RUN groupadd --gid ${USER_GID} ${USERNAME} \
-    && useradd --uid ${USER_UID} --gid ${USER_GID} -m -s /bin/bash ${USERNAME} \
+RUN groupadd --force --gid ${USER_GID} ${USERNAME} \
+    && useradd --uid ${USER_UID} --gid ${USER_GID} --no-log-init -m -s /bin/bash ${USERNAME} \
     && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME}
 
 # ── SSH directory prep ───────────────────────────────────────────
