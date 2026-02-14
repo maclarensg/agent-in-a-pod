@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Dev tools
     build-essential cmake pkg-config \
     # Git + SSH
-    git openssh-client openssh-server \
+    git openssh-client \
     # Terminal
     tmux screen htop less vim nano jq ripgrep fd-find \
     # Python
@@ -48,8 +48,9 @@ RUN curl -fsSL https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}
 RUN npm install -g @anthropic-ai/claude-code
 
 # ── User setup ───────────────────────────────────────────────────
-RUN groupadd --gid ${USER_GID} ${USERNAME} \
-    && useradd --uid ${USER_UID} --gid ${USER_GID} -m -s /bin/bash ${USERNAME} \
+RUN userdel -r ubuntu 2>/dev/null || true \
+    && groupadd --force --gid ${USER_GID} ${USERNAME} \
+    && useradd --uid ${USER_UID} --gid ${USER_GID} --no-log-init -m -s /bin/bash ${USERNAME} \
     && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME}
 
 # ── SSH directory prep ───────────────────────────────────────────
